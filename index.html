@@ -1,62 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>GGCloud VPN Connector</title>
-    <script>
-        // Параметры по умолчанию
-        const DEFAULT_ROUTING = "https://routing.vpn.ru.com/";
-        
-        // Получаем параметры из URL
-        const params = new URLSearchParams(window.location.search);
-        const scheme = params.get('scheme') || 'happ://add/';
-        const key = params.get('key');
-        const routing = params.get('routing') || DEFAULT_ROUTING;
-
-        // Проверяем обязательные параметры
-        if (!key) {
-            document.getElementById('error').textContent = 'Отсутствует ключ подписки';
-            document.getElementById('error').style.display = 'block';
-            throw new Error('Key parameter is required');
-        }
-
-        // Формируем URL для редиректа
-        const subscriptionUrl = `${scheme}https://bot.ggcloud.ru/connection?scheme=${encodeURIComponent(scheme)}&key=${encodeURIComponent(key)}`;
-        
-        // Перенаправляем сначала на подписку, затем на роутинг
-        window.location.href = subscriptionUrl;
-        
-        // Открываем роутинг в новой вкладке (если браузер не ушел в приложение)
-        setTimeout(() => {
-            window.open(routing, '_blank');
-        }, 1000);
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GGCloud VPN Setup</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-        #error { color: red; display: none; margin: 20px 0; }
-        .loader { 
-            margin: 30px auto;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 2s linear infinite;
+        /* Ваши существующие стили */
+        @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;600&display=swap');
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        /* ... остальные ваши стили ... */
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Основные URL
+            const SUBSCRIPTION_URL = "https://bot.ggcloud.ru/connection?scheme=happ://add/&key=https://ee.ggcloud.ru:443/user/03f825fa-0af4-4f28-beeb-c7c8b8655932";
+            const ROUTING_URL = "https://routing.vpn.ru.com/";
+            
+            // Определение языка
+            const language = navigator.language || navigator.userLanguage;
+            const isRussian = language.startsWith('ru');
+
+            // Установка текста
+            document.getElementById('redirectLink').innerText = isRussian ? 
+                'Нажмите для настройки VPN' : 'Click to setup VPN';
+            document.getElementById('instructions').innerText = isRussian ? 
+                'Автоматическая настройка через 5 секунд' : 'Auto-configuration in 5 seconds';
+
+            // Определение темы
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.body.classList.add('dark');
+            } else {
+                document.body.classList.add('light');
+            }
+
+            // Функция для открытия обеих ссылок
+            function setupVPN() {
+                // 1. Открываем подписку в основном окне
+                window.location.href = SUBSCRIPTION_URL;
+                
+                // 2. Открываем роутинг в новой вкладке
+                setTimeout(() => {
+                    window.open(ROUTING_URL, '_blank');
+                }, 500);
+            }
+
+            // Назначение обработчика кнопки
+            document.getElementById('redirectLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                setupVPN();
+            });
+
+            // Автоматический запуск через 5 секунд
+            setTimeout(setupVPN, 5000);
+        });
+    </script>
 </head>
 <body>
-    <div class="loader"></div>
-    <p>Идет подключение к GGCloud VPN...</p>
-    <div id="error"></div>
-    
-    <!-- Fallback для браузеров без JS -->
-    <noscript>
-        <h2>Ошибка: Требуется JavaScript</h2>
-        <p>Для работы сервиса необходимо включить JavaScript.</p>
-    </noscript>
+    <div class="container">
+        <a id="redirectLink" class="button" href="#">Click to setup VPN</a>
+        <p id="instructions">Auto-configuration in 5 seconds</p>
+    </div>
 </body>
 </html>
