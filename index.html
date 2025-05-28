@@ -4,72 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GGCloud VPN Setup</title>
-    <style>
-        /* Ваши существующие стили */
-        @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;600&display=swap');
-        body {
-            font-family: 'Ubuntu', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-            overflow: hidden;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        /* ... остальные ваши стили ... */
-    </style>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Основные URL
-            const SUBSCRIPTION_URL = "https://bot.ggcloud.ru/connection?scheme=happ://add/&key=https://ee.ggcloud.ru:443/user/03f825fa-0af4-4f28-beeb-c7c8b8655932";
-            const ROUTING_URL = "https://routing.vpn.ru.com/";
-            
-            // Определение языка
-            const language = navigator.language || navigator.userLanguage;
-            const isRussian = language.startsWith('ru');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Конфигурация
+            const CONFIG = {
+                subscription: {
+                    url: "https://bot.ggcloud.ru/connection",
+                    scheme: "happ://add/",
+                    key: "https://ee.ggcloud.ru:443/user/03f825fa-0af4-4f28-beeb-c7c8b8655932"
+                },
+                routing: {
+                    url: "https://routing.vpn.ru.com",
+                    type: "happ"
+                }
+            };
 
-            // Установка текста
-            document.getElementById('redirectLink').innerText = isRussian ? 
-                'Нажмите для настройки VPN' : 'Click to setup VPN';
-            document.getElementById('instructions').innerText = isRussian ? 
-                'Автоматическая настройка через 5 секунд' : 'Auto-configuration in 5 seconds';
-
-            // Определение темы
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.body.classList.add('dark');
-            } else {
-                document.body.classList.add('light');
-            }
-
-            // Функция для открытия обеих ссылок
-            function setupVPN() {
-                // 1. Открываем подписку в основном окне
-                window.location.href = SUBSCRIPTION_URL;
+            // Генерация deep link
+            function generateConfigLink() {
+                const fullConfig = {
+                    timestamp: Date.now(),
+                    subscription: CONFIG.subscription,
+                    routing: CONFIG.routing
+                };
                 
-                // 2. Открываем роутинг в новой вкладке
-                setTimeout(() => {
-                    window.open(ROUTING_URL, '_blank');
-                }, 500);
+                return `happ://apply-config/${encodeURIComponent(JSON.stringify(fullConfig))}`;
             }
 
-            // Назначение обработчика кнопки
-            document.getElementById('redirectLink').addEventListener('click', function(e) {
-                e.preventDefault();
-                setupVPN();
-            });
+            // Основной процесс
+            function setupVPN() {
+                const deepLink = generateConfigLink();
+                
+                // Попытка открыть в приложении
+                window.location.href = deepLink;
+                
+                // Фолбэк через 1 секунду
+                setTimeout(() => {
+                    if (!document.hidden) {
+                        alert("Пожалуйста, откройте ссылку в приложении GGCloud VPN");
+                    }
+                }, 1000);
+            }
 
-            // Автоматический запуск через 5 секунд
-            setTimeout(setupVPN, 5000);
+            // Автозапуск
+            setTimeout(setupVPN, 3000);
         });
     </script>
 </head>
 <body>
-    <div class="container">
-        <a id="redirectLink" class="button" href="#">Click to setup VPN</a>
-        <p id="instructions">Auto-configuration in 5 seconds</p>
+    <div style="text-align: center; padding: 50px;">
+        <h2>Идет настройка GGCloud VPN...</h2>
+        <p>Пожалуйста, подождите</p>
     </div>
 </body>
 </html>
